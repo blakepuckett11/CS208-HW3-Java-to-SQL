@@ -133,7 +133,12 @@ public class Main
                     menuListAllRegisteredStudents();
                     break;
 
-                //TODO: add your code here
+                case 31:
+                    menuAddRegisteredStudent();
+                    break;
+                case 32:
+                    menuDeleteRegisteredStudent();
+                    break;
 
 
                 default:
@@ -247,6 +252,40 @@ public class Main
         System.out.println("Listing all students...");
         database.listAllStudents();
     }
+    private static void menuUpdateExistingStudentInformation()
+    {
+        System.out.println("Updating existing class information...");
+
+        int id = 0;
+        String firstName = null;
+        String lastName = null;
+        Date birthDate = null;
+
+        try
+        {
+            System.out.print("Enter the existing class id you want to update: ");
+            id = Integer.parseInt(inputScanner.nextLine());
+
+            System.out.print("Enter a new first name: ");
+            firstName = inputScanner.nextLine();
+
+            System.out.print("Enter a new last name: ");
+            lastName = inputScanner.nextLine();
+
+            System.out.print("Enter a new birth date: ");
+            birthDate = Date.valueOf(inputScanner.nextLine());
+
+
+        }
+        catch (Exception e)
+        {
+            System.out.println("Invalid input, please try again.");
+            return;
+        }
+
+        Student studentToUpdate = new Student(id, firstName, lastName, birthDate);
+        database.updateExistingStudentInformation(studentToUpdate);
+    }
 
     private static void menuAddNewStudent()
     {
@@ -257,7 +296,11 @@ public class Main
         Date birthDate = null;
         try
         {
-            // TODO: add your code here
+            System.out.print("Enter the student's first name: ");
+            firstName = inputScanner.nextLine();
+
+            System.out.print("Enter the students last name: ");
+            lastName = inputScanner.nextLine();
 
             System.out.print("Enter the student birth date in ISO format (yyyy-mm-dd): ");
             birthDate = Date.valueOf(inputScanner.nextLine());
@@ -268,21 +311,28 @@ public class Main
             return;
         }
 
-        // TODO: add your code here
+        Student newStudent = new Student(firstName,lastName,birthDate);
+        database.addNewStudent(newStudent);
     }
 
-    private static void menuUpdateExistingStudentInformation()
-    {
-        System.out.println("Updating existing student information...");
 
-        // TODO: add your code here
-    }
 
     private static void menuDeleteExistingStudent()
     {
         System.out.println("Deleting existing student...");
+        int id = 0;
+        try
+        {
+            System.out.print("Enter the existing student id you want to delete: ");
+            id = Integer.parseInt(inputScanner.nextLine());
+        }
+        catch (Exception e)
+        {
+            System.out.println("Invalid input, please try again.");
+            return;
+        }
 
-        // TODO: add your code here
+        database.deleteExistingStudent(id);
     }
 
     private static void menuListAllRegisteredStudents()
@@ -290,5 +340,28 @@ public class Main
         System.out.println("Listing all registered students...");
         database.listAllRegisteredStudents();
     }
+    private static void menuAddRegisteredStudent() {
+        int classId;
+        int studentId;
+        System.out.println("Adding new registered student...");
+        System.out.println("Enter an existing student ID: ");
+        studentId = Integer.parseInt(inputScanner.nextLine());
+        System.out.println("Enter an existing class ID: ");
+        classId = Integer.parseInt(inputScanner.nextLine());
 
+        database.addNewStudentToClass(studentId,classId);
+
+    }
+    private static void menuDeleteRegisteredStudent() {
+        int classId;
+        int studentId;
+        System.out.println("Deleting existing registered student...");
+        System.out.println("Enter an existing student ID: ");
+        studentId = Integer.parseInt(inputScanner.nextLine());
+        System.out.println("Enter an existing class ID: ");
+        classId = Integer.parseInt(inputScanner.nextLine());
+
+        database.deleteRegisteredStudent(studentId,classId);
+
+    }
 }

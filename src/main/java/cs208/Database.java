@@ -303,6 +303,42 @@ public class Database
             System.out.println(sqlException.getMessage());
         }
     }
+    public void updateExistingStudentInformation(Student studentToUpdate)
+    {
+        String sql =
+                "UPDATE students\n" +
+                        "SET first_name = ?, last_name = ?, birth_date = ?\n" +
+                        "WHERE id = ?;";
+
+        try
+                (
+                        Connection connection = getDatabaseConnection();
+                        PreparedStatement sqlStatement = connection.prepareStatement(sql);
+                )
+        {
+            sqlStatement.setString(1, studentToUpdate.getFirstName());
+            sqlStatement.setString(2, studentToUpdate.getLastName());
+            sqlStatement.setString(3, studentToUpdate.getBirthDate().toString());
+            sqlStatement.setInt(4, studentToUpdate.getId());
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0)
+            {
+                System.out.println("SUCCESSFULLY updated the student with id = " + studentToUpdate.getId());
+            }
+            else
+            {
+                System.out.println("!!! WARNING: failed to update the student with id = " + studentToUpdate.getId());
+            }
+        }
+        catch (SQLException sqlException)
+        {
+            System.out.println("!!! SQLException: failed to update the student with id = " + studentToUpdate.getId());
+            System.out.println(sqlException.getMessage());
+        }
+    }
 
     public void deleteExistingClass(int idOfClassToDelete)
     {
@@ -379,8 +415,49 @@ public class Database
         //
         // to set the date parameter in the unix format (i.e., milliseconds since 1970), use this code:
         // sqlStatement.setDate(columnIndexTBD, newStudent.getBirthDate());
+        String sql =
+                "INSERT INTO students (first_name, last_name, birth_date)\n" +
+                        "VALUES (?, ?, ?);";
 
-        // TODO: add your code here
+        try
+                (
+                        Connection connection = getDatabaseConnection();
+                        PreparedStatement sqlStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                )
+        {
+            sqlStatement.setString(1, newStudent.getFirstName());
+            sqlStatement.setString(2, newStudent.getLastName());
+            sqlStatement.setString(3, newStudent.getBirthDate().toString());
+
+
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0)
+            {
+                ResultSet resultSet = sqlStatement.getGeneratedKeys();
+
+                while (resultSet.next())
+                {
+                    // "last_insert_rowid()" is the column name that contains the id of the last inserted row
+                    // alternatively, we could have used resultSet.getInt(1); to get the id of the first column returned
+                    int generatedIdForTheNewlyInsertedStudent = resultSet.getInt("last_insert_rowid()");
+                    System.out.println("SUCCESSFULLY inserted a new student with id = " + generatedIdForTheNewlyInsertedStudent);
+
+                    // this can be useful if we need to make additional processing on the newClass object
+                    newStudent.setId(generatedIdForTheNewlyInsertedStudent);
+                }
+
+                resultSet.close();
+            }
+        }
+        catch (SQLException sqlException)
+        {
+            System.out.println("!!! SQLException: failed to insert into the classes table");
+            System.out.println(sqlException.getMessage());
+        }
+
     }
 
     public void listAllRegisteredStudents()
@@ -414,6 +491,88 @@ public class Database
         catch (SQLException sqlException)
         {
             System.out.println("!!! SQLException: failed to query the registered_students table. Make sure you executed the schema.sql and seeds.sql scripts");
+            System.out.println(sqlException.getMessage());
+        }
+    }
+    public void deleteExistingStudent(int idOfStudentToDelete)
+    {
+        String sql =
+                "DELETE FROM students\n" +
+                        "WHERE id = ?;";
+
+        try
+                (
+                        Connection connection = getDatabaseConnection();
+                        PreparedStatement sqlStatement = connection.prepareStatement(sql);
+                )
+        {
+            sqlStatement.setInt(1, idOfStudentToDelete);
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0)
+            {
+                System.out.println("SUCCESSFULLY deleted the student with id = " + idOfStudentToDelete);
+            }
+            else
+            {
+                System.out.println("!!! WARNING: failed to delete the student with id = " + idOfStudentToDelete);
+            }
+        }
+        catch (SQLException sqlException)
+        {
+            System.out.println("!!! SQLException: failed to delete the student with id = " + idOfStudentToDelete);
+            System.out.println(sqlException.getMessage());
+        }
+    }
+    public void addNewStudentToClass(int studentId, int classId) {
+        String sql =
+                "INSERT INTO registered_students (student_id, class_id)\n" +
+                        "VALUES (?, ?);";
+
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql);
+        ) {
+            sqlStatement.setInt(1, studentId);
+            sqlStatement.setInt(2, classId);
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0) {
+                System.out.println("SUCCESSFULLY added student with ID " + studentId + " to class with ID " + classId);
+            } else {
+                System.out.println("!!! WARNING: failed to add student to class");
+            }
+        } catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to add student to class");
+            System.out.println(sqlException.getMessage());
+        }
+    }
+    public void deleteRegisteredStudent(int studentId, int classId) {
+        String sql =
+                "DELETE FROM registered_students\n" +
+                        "WHERE student_id = ? AND class_id = ?;";
+
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql);
+        ) {
+            sqlStatement.setInt(1, studentId);
+            sqlStatement.setInt(2, classId);
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0) {
+                System.out.println("SUCCESSFULLY deleted registered student with ID " + studentId + " from class with ID " + classId);
+            } else {
+                System.out.println("!!! WARNING: failed to delete registered student from class");
+            }
+        } catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to delete registered student from class");
             System.out.println(sqlException.getMessage());
         }
     }
